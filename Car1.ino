@@ -19,80 +19,71 @@ long RF_ReceivedValue;
 #define RF_BUTTON_RIGHT 5592380 // right (button 6)
 #define RF_BUTTON_DOWN 5592335 // down (button 3)
 
-#define Backward_Left 4
-#define Forward_Left 5
-#define Backward_Right 6
-#define Forward_Right 7
+// PINs
+#define Backward_Left_Pin 4
+#define Forward_Left_Pin 5
+#define Backward_Right_Pin 6
+#define Forward_Right_Pin 7
 
-#define Sensor_TrigPin 8 // Trigger 
-#define Sensor_EchoPin 9 // Echo
+#define Sensor_Trig_Pin 8 // Trigger 
+#define Sensor_Echo_Pin 9 // Echo
 
-#define CLK 13
-#define DIO 12
+#define Display_CLK_Pin 13
+#define Display_DIO_Pin 12
 
+#define Buzzer_Pin 10
+
+// Public variables
 bool IsBackward = false;
 
 RCSwitch mySwitch = RCSwitch();
-TM1637Display myDisplay(CLK, DIO);
+TM1637Display myDisplay(Display_CLK_Pin, Display_DIO_Pin);
 long duration, distance;
 
 void setup() {
   // put your setup code here, to run once:
-  pinMode (Forward_Right, OUTPUT);
-  pinMode (Forward_Left, OUTPUT);
-  pinMode (Backward_Right, OUTPUT);
-  pinMode (Backward_Left, OUTPUT);
-
-  Serial.begin(9600); // Monitor size (the output window size)
-  pinMode(Sensor_TrigPin, OUTPUT); // The trigger of the sensor is output
-  pinMode(Sensor_EchoPin, INPUT); // The echo of the sensor is input  
+  pinMode (Forward_Right_Pin, OUTPUT);
+  pinMode (Forward_Left_Pin, OUTPUT);
+  pinMode (Backward_Right_Pin, OUTPUT);
+  pinMode (Backward_Left_Pin, OUTPUT);
+  pinMode (Buzzer_Pin, OUTPUT);
+  pinMode (Sensor_Trig_Pin, OUTPUT); // The trigger of the sensor is output
+  pinMode (Sensor_Echo_Pin, INPUT); // The echo of the sensor is input
+   
   myDisplay.setBrightness(0x0f);
   myDisplay.clear();
   mySwitch.enableReceive(0);  // Receiver on interrupt 0 => that is pin #2
+  
+  Serial.begin(9600); // Monitor size (the output window size)
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-
+  tone(Buzzer_Pin, 555, 100);
   SonarSensor(); // Test the distance
-  //GetRemote(); // Test the RF remote control
-  GetRemote();
+  GetRemote(); // Get the RF remote control
   myDisplay.showNumberDec(distance, false);
   
    //Serial.println(distance); // Get out to the monitor the output
-  /*Stop();
-  delay (300000000);
-  GoForward();
-  delay (3000);
-  Stop();
-  delay (3000);  
-  GoBackward();
-  delay (2000);
-  GoRight();
-  delay (2000);
-  GoLeft();
-  delay (1000);
-  Stop();
-  delay (3000);*/
 }
 
 // ============================================================
 
 void SonarSensor() {
-  digitalWrite(Sensor_TrigPin, LOW);
+  digitalWrite(Sensor_Trig_Pin, LOW);
   delayMicroseconds(2);
-  digitalWrite(Sensor_TrigPin, HIGH); // Sends the pulse
+  digitalWrite(Sensor_Trig_Pin, HIGH); // Sends the pulse
   delayMicroseconds(10);
-  digitalWrite(Sensor_TrigPin, LOW);
-  duration = pulseIn(Sensor_EchoPin, HIGH); // Checks how much time took to the pulse to return from the obstacle
+  digitalWrite(Sensor_Trig_Pin, LOW);
+  duration = pulseIn(Sensor_Echo_Pin, HIGH); // Checks how much time took to the pulse to return from the obstacle
   distance = (duration / 2) / 29.1; // Divides the duration by 2 to make it one way
   //Serial.println(distance); // Get out to the monitor the output
 
   if (distance < 30 && IsBackward == false) {
     Stop();
+    //tone(Buzzer_Pin, distance*2, 100);
   }
   
-  // tone(buzzerPin, distance*2, 100);
+  // tone(Buzzer_Pin, distance*2, 100);
 }
 void GetRF() {
   RF_ReceivedValue = 0;
@@ -110,10 +101,9 @@ void GetRF() {
 
 void GetRemote() {
   //long switchButton = 0;
-  Serial.println(IsBackward);
+  //Serial.println(IsBackward);
   
   if (mySwitch.available()) {
-    //Serial.println(mySwitch.getReceivedValue());
     
     long switchButton = 0;
     switchButton = mySwitch.getReceivedValue();
@@ -149,36 +139,36 @@ void GetRemote() {
 // ============================================================
 
 void GoForward() {
-  digitalWrite (Forward_Right, HIGH);
-  digitalWrite (Forward_Left, HIGH);
-  digitalWrite (Backward_Right, LOW);
-  digitalWrite (Backward_Left, LOW);
+  digitalWrite (Forward_Right_Pin, HIGH);
+  digitalWrite (Forward_Left_Pin, HIGH);
+  digitalWrite (Backward_Right_Pin, LOW);
+  digitalWrite (Backward_Left_Pin, LOW);
 }
 
 void GoBackward() {
-  digitalWrite (Forward_Right, LOW);
-  digitalWrite (Forward_Left, LOW);
-  digitalWrite (Backward_Right, HIGH);
-  digitalWrite (Backward_Left, HIGH);
+  digitalWrite (Forward_Right_Pin, LOW);
+  digitalWrite (Forward_Left_Pin, LOW);
+  digitalWrite (Backward_Right_Pin, HIGH);
+  digitalWrite (Backward_Left_Pin, HIGH);
 }
 
 void GoRight() {
-  digitalWrite (Forward_Right, LOW);
-  digitalWrite (Forward_Left, HIGH);
-  digitalWrite (Backward_Right, LOW);
-  digitalWrite (Backward_Left, LOW);
+  digitalWrite (Forward_Right_Pin, LOW);
+  digitalWrite (Forward_Left_Pin, HIGH);
+  digitalWrite (Backward_Right_Pin, LOW);
+  digitalWrite (Backward_Left_Pin, LOW);
 }
 
 void GoLeft() {
-  digitalWrite (Forward_Right, HIGH);
-  digitalWrite (Forward_Left, LOW);
-  digitalWrite (Backward_Right, LOW);
-  digitalWrite (Backward_Left, LOW);
+  digitalWrite (Forward_Right_Pin, HIGH);
+  digitalWrite (Forward_Left_Pin, LOW);
+  digitalWrite (Backward_Right_Pin, LOW);
+  digitalWrite (Backward_Left_Pin, LOW);
 }
 
 void Stop() {
-  digitalWrite (Forward_Right, LOW);
-  digitalWrite (Forward_Left, LOW);
-  digitalWrite (Backward_Right, LOW);
-  digitalWrite (Backward_Left, LOW);
+  digitalWrite (Forward_Right_Pin, LOW);
+  digitalWrite (Forward_Left_Pin, LOW);
+  digitalWrite (Backward_Right_Pin, LOW);
+  digitalWrite (Backward_Left_Pin, LOW);
 }
